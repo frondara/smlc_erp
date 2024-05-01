@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
                         builder: (_) => const HomeScreen());
                   default:
                     return MaterialPageRoute(
-                        builder: (_) => const HomeScreen());
+                        builder: (_) => const SignInScreen());
                 }
               },
             );

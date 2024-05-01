@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 
-Image logoWidget(String imageName) {
-  return Image.asset(imageName,
-      fit: BoxFit.fitWidth, width: 240, height: 240, color: Colors.white);
+Widget logoWidget(String imageName) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(30.0), // Set the radius here
+    child: Image.asset(
+      imageName,
+      fit: BoxFit.fitWidth,
+      width: 150,
+      height: 150,
+    ),
+  );
 }
 
 TextField reusableTextField(String text, IconData icon, bool isPasswordType,
-    TextEditingController controller) {
+    TextEditingController controller,
+    {bool showPasswordToggle = false,
+    required VoidCallback onTogglePasswordVisibility}) {
   return TextField(
       controller: controller,
       obscureText: isPasswordType,
@@ -28,8 +37,46 @@ TextField reusableTextField(String text, IconData icon, bool isPasswordType,
           borderRadius: BorderRadius.circular(30),
           borderSide: const BorderSide(width: 0, style: BorderStyle.none),
         ),
+        suffixIcon: showPasswordToggle
+            ? IconButton(
+                icon: Icon(
+                  isPasswordType ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.white70,
+                ),
+                onPressed: onTogglePasswordVisibility,
+              )
+            : null,
       ),
       keyboardType: isPasswordType
           ? TextInputType.visiblePassword
           : TextInputType.emailAddress);
+}
+
+Container signInSignUpButton(
+    BuildContext context, bool isLogin, Function onTap) {
+  return Container(
+    width: MediaQuery.of(context).size.width,
+    height: 50,
+    margin: const EdgeInsets.fromLTRB(0, 10, 0, 20),
+    decoration: BoxDecoration(borderRadius: BorderRadius.circular(90)),
+    child: ElevatedButton(
+      onPressed: () {
+        onTap();
+      },
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.pressed)) {
+              return Colors.black26;
+            }
+            return Colors.white;
+          }),
+          shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)))),
+      child: Text(
+        isLogin ? 'LOGIN' : 'SIGN UP',
+        style: const TextStyle(
+            color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+    ),
+  );
 }
