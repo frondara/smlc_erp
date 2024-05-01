@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smlc_erp/screens/home.dart';
 import 'package:smlc_erp/screens/signin.dart';
-import 'package:smlc_erp/utils/color_utils.dart';
 import 'package:smlc_erp/widgets/reusable_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -41,7 +40,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 400),
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -79,7 +78,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             MaterialPageRoute(
                                 builder: (context) => const HomeScreen()));
                       }).onError((error, stackTrace) {
-                        print("Error: ${error.toString()}");
+                        //print("Error: ${error.toString()}");
                       });
                     }),
                     signInOption(),
