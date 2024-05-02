@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smlc_erp/screens/home.dart';
 import 'package:smlc_erp/screens/signup.dart';
+import 'package:smlc_erp/services/firebase_user_service.dart';
 import 'package:smlc_erp/services/validations.dart';
 import 'package:smlc_erp/widgets/error_message.dart';
 import 'package:smlc_erp/widgets/reusable_widget.dart';
@@ -15,6 +16,8 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  final FirebaseService _firebaseService = FirebaseService();
+
   final TextEditingController _passwordTextController = TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -50,13 +53,14 @@ class _SignInScreenState extends State<SignInScreen> {
                     children: <Widget>[
                       logoWidget("assets/images/SMLC official logo.png"),
                       const SizedBox(height: 70),
-                      reusableTextField("Enter Email", Icons.person_outline,
-                          false, _emailTextController,
-                          validator: validateEmail),
+                      reusableTextField("Enter Username or Email",
+                          Icons.person_outline, false, _emailTextController,
+                          validator: validateEmailLogin),
                       const SizedBox(height: 30),
                       reusableTextField("Enter Password", Icons.lock_outline,
                           !_isPasswordVisible, _passwordTextController,
-                          showPasswordToggle: true, validator: validatePassword,
+                          showPasswordToggle: true,
+                          validator: validatePasswordLogin,
                           onTogglePasswordVisibility: () {
                         setState(() {
                           _isPasswordVisible = !_isPasswordVisible;
@@ -76,10 +80,10 @@ class _SignInScreenState extends State<SignInScreen> {
                           });
                           if (_formKey.currentState!.validate()) {
                             try {
-                              await FirebaseAuth.instance
-                                  .signInWithEmailAndPassword(
-                                      email: _emailTextController.text,
-                                      password: _passwordTextController.text);
+                              await _firebaseService.login(
+                                  _emailTextController.text,
+                                  _passwordTextController.text);
+
                               setState(() {
                                 _message =
                                     "Login Successfully. Redirecting you to homepage..";

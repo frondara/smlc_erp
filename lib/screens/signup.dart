@@ -1,10 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:smlc_erp/screens/home.dart';
 import 'package:smlc_erp/screens/signin.dart';
+import 'package:smlc_erp/services/firebase_user_service.dart';
 import 'package:smlc_erp/services/validations.dart';
 import 'package:smlc_erp/widgets/error_message.dart';
 import 'package:smlc_erp/widgets/reusable_widget.dart';
+import 'package:smlc_erp/widgets/success_message.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -14,13 +14,16 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  final FirebaseService _firebaseService = FirebaseService();
   final TextEditingController _passwordTextController = TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
   final TextEditingController _userNameTextController = TextEditingController();
   bool _isPasswordVisible = false;
   final _formKey = GlobalKey<FormState>();
   bool _showError = false;
-
+  String _errorMessage = "";
+  bool _isLoading = false;
+  bool _isSuccessSignup = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +59,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 20),
                       reusableTextField("Enter Username", Icons.person_outline,
                           false, _userNameTextController,
-                          validator: validateUsername),
+                          validator: validateUsernameSignUp),
                       const SizedBox(height: 20),
                       reusableTextField("Enter Email", Icons.email, false,
                           _emailTextController,
@@ -64,37 +67,63 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 20),
                       reusableTextField("Enter Password", Icons.lock_outline,
                           !_isPasswordVisible, _passwordTextController,
-                          showPasswordToggle: true, validator: validatePassword,
+                          showPasswordToggle: true,
+                          validator: validatePasswordSignUp,
                           onTogglePasswordVisibility: () {
                         setState(() {
                           _isPasswordVisible = !_isPasswordVisible;
                         });
                       }),
                       const SizedBox(height: 20),
-                      signInSignUpButton(context, false, () {
-                        if (_formKey.currentState!.validate()) {
-                          FirebaseAuth.instance
-                              .createUserWithEmailAndPassword(
-                                  email: _emailTextController.text,
-                                  password: _passwordTextController.text)
-                              .then((value) {
-                            Navigator.push(
+                      if (_isLoading)
+                        CircularProgressIndicator()
+                      else
+                        signInSignUpButton(context, false, () async {
+                          if (!_formKey.currentState!.validate()) {
+                            return; // Exit early if validation fails
+                          }
+                          setState(() {
+                            _showError = false;
+                            _isLoading =
+                                true; // Start loading only after validation passes
+                          });
+                          try {
+                            final userCredentials =
+                                await _firebaseService.createUser(
+                                    _emailTextController.text,
+                                    _passwordTextController.text);
+
+                            await _firebaseService.addUserDetails(
+                                userCredentials.user!.uid,
+                                _userNameTextController.text,
+                                _emailTextController.text);
+
+                            Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const HomeScreen()));
-                          }).onError((error, stackTrace) {
-                            print("Error: ${error.toString()}");
+                                    builder: (context) =>
+                                        const SignInScreen()));
+                          } catch (e) {
+                            _errorMessage = e.toString();
+                            _showError = true;
+                          } finally {
                             setState(() {
-                              _showError = true;
+                              _isLoading =
+                                  false; // Ensure loading is stopped whether success or failure
                             });
-                          });
-                        }
-                      }),
-                      ErrorMessageWidget(
-                        message:
-                            "Something wrong with signing in your account. please try again.",
-                        isVisible: _showError,
-                      ),
+                          }
+                        }),
+                      if (_showError)
+                        ErrorMessageWidget(
+                          message: _errorMessage,
+                          isVisible: true,
+                        )
+                      else if (!_showError && _isSuccessSignup)
+                        SuccessMessageWidget(
+                          message:
+                              "Signup Successfully. Redirecting you to login page..",
+                          isVisible: true,
+                        ),
                       signInOption(),
                     ],
                   ),
