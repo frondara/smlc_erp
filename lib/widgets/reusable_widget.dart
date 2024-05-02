@@ -12,44 +12,53 @@ Widget logoWidget(String imageName) {
   );
 }
 
-TextField reusableTextField(String text, IconData icon, bool isPasswordType,
-    TextEditingController controller,
-    {bool showPasswordToggle = false,
-    required VoidCallback onTogglePasswordVisibility}) {
-  return TextField(
-      controller: controller,
-      obscureText: isPasswordType,
-      enableSuggestions: !isPasswordType,
-      autocorrect: !isPasswordType,
-      cursorColor: Colors.white,
-      style: TextStyle(color: Colors.white.withOpacity(0.9)),
-      decoration: InputDecoration(
-        prefixIcon: Icon(
-          icon,
-          color: Colors.white70,
-        ),
-        labelText: text,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
-        filled: true,
-        floatingLabelBehavior: FloatingLabelBehavior.never,
-        fillColor: Colors.white.withOpacity(0.3),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(width: 0, style: BorderStyle.none),
-        ),
-        suffixIcon: showPasswordToggle
-            ? IconButton(
-                icon: Icon(
-                  isPasswordType ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.white70,
-                ),
-                onPressed: onTogglePasswordVisibility,
-              )
-            : null,
+TextFormField reusableTextField(
+  String labelText,
+  IconData icon,
+  bool isPasswordType,
+  TextEditingController controller, {
+  bool showPasswordToggle = false,
+  required Function(String?) validator,
+  VoidCallback? onTogglePasswordVisibility,
+}) {
+  return TextFormField(
+    controller: controller,
+    obscureText: isPasswordType,
+    enableSuggestions: !isPasswordType,
+    autocorrect: !isPasswordType,
+    cursorColor: Colors.white,
+    style: TextStyle(color: Colors.white.withOpacity(0.9)),
+    decoration: InputDecoration(
+      prefixIcon: Icon(
+        icon,
+        color: Colors.white70,
       ),
-      keyboardType: isPasswordType
-          ? TextInputType.visiblePassword
-          : TextInputType.emailAddress);
+      labelText: labelText,
+      labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+      filled: true,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      fillColor: Colors.white.withOpacity(0.3),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30),
+        borderSide: const BorderSide(width: 0, style: BorderStyle.none),
+      ),
+      suffixIcon: showPasswordToggle
+          ? IconButton(
+              icon: Icon(
+                isPasswordType ? Icons.visibility_off : Icons.visibility,
+                color: Colors.white70,
+              ),
+              onPressed: onTogglePasswordVisibility,
+            )
+          : null,
+      errorStyle:
+          TextStyle(color: Colors.white), // Set the error text color to white
+    ),
+    keyboardType: isPasswordType
+        ? TextInputType.visiblePassword
+        : TextInputType.emailAddress,
+    validator: (value) => validator(value),
+  );
 }
 
 Container signInSignUpButton(

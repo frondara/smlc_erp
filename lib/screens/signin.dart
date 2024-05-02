@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smlc_erp/screens/home.dart';
 import 'package:smlc_erp/screens/signup.dart';
+import 'package:smlc_erp/services/validations.dart';
+import 'package:smlc_erp/widgets/error_message.dart';
 import 'package:smlc_erp/widgets/reusable_widget.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -14,8 +16,9 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordTextController = TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
-  bool _isPasswordVisible =
-      false; // Initialize as false to start with the password hidden
+  bool _isPasswordVisible = false;
+  final _formKey = GlobalKey<FormState>(); // Add a key for the form
+  bool _showError = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,54 +36,67 @@ class _SignInScreenState extends State<SignInScreen> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // Center content vertically
-                children: <Widget>[
-                  logoWidget("assets/images/SMLC official logo.png"),
-                  const SizedBox(height: 70),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: reusableTextField("Enter Username",
-                        Icons.person_outline, false, _emailTextController,
-                        showPasswordToggle: false,
-                        onTogglePasswordVisibility: () {}),
-                  ),
-                  const SizedBox(height: 30),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: reusableTextField(
-                        "Enter Password",
-                        Icons.lock_outline,
-                        !_isPasswordVisible,
-                        _passwordTextController,
-                        showPasswordToggle: true,
-                        onTogglePasswordVisibility: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    }),
-                  ),
-                  const SizedBox(height: 30),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: signInSignUpButton(context, true, () {
-                      FirebaseAuth.instance
-                          .signInWithEmailAndPassword(
-                              email: _emailTextController.text,
-                              password: _passwordTextController.text)
-                          .then((value) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const HomeScreen()));
-                      }).onError((error, stackTrace) {
-                        //("Error login: ${error.toString()}");
-                      });
-                    }),
-                  ),
-                  signUpOption(),
-                ],
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    logoWidget("assets/images/SMLC official logo.png"),
+                    const SizedBox(height: 70),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: reusableTextField("Enter Email",
+                          Icons.person_outline, false, _emailTextController,
+                          validator: validateEmail),
+                    ),
+                    const SizedBox(height: 30),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: reusableTextField(
+                          "Enter Password",
+                          Icons.lock_outline,
+                          !_isPasswordVisible,
+                          _passwordTextController,
+                          showPasswordToggle: true,
+                          validator: validatePassword,
+                          onTogglePasswordVisibility: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      }),
+                    ),
+                    const SizedBox(height: 10),
+                    forgotPasswordOption(),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: signInSignUpButton(context, true, () {
+                        if (_formKey.currentState!.validate()) {
+                          FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                                  email: _emailTextController.text,
+                                  password: _passwordTextController.text)
+                              .then((value) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const HomeScreen()),
+                            );
+                          }).onError((error, stackTrace) {
+                            print("Error login: ${error.toString()}");
+                            setState(() {
+                              _showError = true;
+                            });
+                          });
+                        }
+                      }),
+                    ),
+                    ErrorMessageWidget(
+                      message: "Incorrect Username or Password",
+                      isVisible: _showError,
+                    ),
+                    signUpOption(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -103,6 +119,24 @@ class _SignInScreenState extends State<SignInScreen> {
           child: const Text(
             "Sign Up",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
+
+  Row forgotPasswordOption() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        GestureDetector(
+          onTap: () {
+            //Navigator.push(context,
+            //    MaterialPageRoute(builder: (context) => const SignUpScreen()));
+          },
+          child: const Text(
+            "Forgot Password?",
+            style: TextStyle(color: Colors.white),
           ),
         )
       ],
