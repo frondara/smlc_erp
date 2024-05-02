@@ -18,6 +18,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut(); // Ensures sign-out completes
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const SignInScreen()),
+      (Route<dynamic> route) =>
+          false, // Removes all the routes below the Sign In screen
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,12 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SignInScreen()));
-            },
+            onPressed: _signOut,
           ),
         ],
       ),
@@ -68,23 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.person_2_outlined),
-              title: const Text('My Account'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: const Text('Logout'),
-              onTap: () {
-                FirebaseAuth.instance.signOut().then((value) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SignInScreen()));
-                });
-              },
+              onTap: _signOut,
             ),
           ],
         ),
