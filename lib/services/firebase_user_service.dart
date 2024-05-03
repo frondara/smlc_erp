@@ -47,15 +47,13 @@ class FirebaseService {
     return result.docs.first.data()['email'] as String;
   }
 
-  Future<String> getUsernameFromDB(String username) async {
-    final result = await _firestore
+  Future<bool> isUsernameExists(String username) async {
+    final QuerySnapshot<Map<String, dynamic>> result = await FirebaseFirestore
+        .instance
         .collection('users')
         .where('username', isEqualTo: username)
-        .limit(1)
         .get();
-    if (result.docs.isEmpty) {
-      return "";
-    }
-    return result.docs.first.data()['username'] as String;
+
+    return result.docs.isNotEmpty;
   }
 }

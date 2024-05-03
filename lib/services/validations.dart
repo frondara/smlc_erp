@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:smlc_erp/services/firebase_user_service.dart';
 
 final FirebaseService _firebaseService = FirebaseService();
@@ -51,7 +52,7 @@ String? validatePasswordSignUp(String? value) {
 
 String? validateUsername(String? value) {
   if (value == null || value.isEmpty || value.trim() == "") {
-    return 'Please enter a username';
+    return 'Please enter your username';
   }
   if (value.contains(' ')) {
     return 'Username should not contain spaces';
@@ -63,7 +64,7 @@ String? validateUsername(String? value) {
 
 String? validateUsernameSignUp(String? value) {
   if (value == null || value.isEmpty) {
-    return 'Please enter a username';
+    return 'Please enter your username';
   }
   if (value.contains(' ')) {
     return 'Username should not contain spaces';
@@ -71,8 +72,6 @@ String? validateUsernameSignUp(String? value) {
   if (value.length < 3 || value.length > 20) {
     return 'Username must be between 3 and 20 characters';
   }
-
-  // Check for username uniqueness
 
   return null; // If all checks are passed, return null
 }
