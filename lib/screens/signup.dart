@@ -87,6 +87,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             _isLoading =
                                 true; // Start loading only after validation passes
                           });
+                          bool isUserNameExists = await _firebaseService
+                              .isUsernameExists(_userNameTextController.text);
+                          if (isUserNameExists) {
+                            setState(() {
+                              _errorMessage = 'Username already exists';
+                              _showError = true;
+                              _isLoading = false;
+                            });
+                            return; // Stop the sign-up process if the username is taken
+                          }
+
                           try {
                             final userCredentials =
                                 await _firebaseService.createUser(

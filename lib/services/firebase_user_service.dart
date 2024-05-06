@@ -19,6 +19,7 @@ class FirebaseService {
       'username': username,
       'email': email,
       'Role': "N/A",
+      'dateTimeAdded': FieldValue.serverTimestamp(),
     });
   }
 

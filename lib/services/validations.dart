@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:smlc_erp/services/firebase_user_service.dart';
 
 final FirebaseService _firebaseService = FirebaseService();
